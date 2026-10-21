@@ -1,0 +1,16 @@
+{
+  "name": "repo-rings",
+  "owner": {
+    "name": "majiayu000"
+  },
+  "metadata": {
+    "description": "repo-rings: git history as a tree-ring cross-section."
+  },
+  "plugins": [
+    {
+      "name": "repo-rings",
+      "source": "./",
+      "description": "Turn a git repository's history into a tree-ring cross-section poster that grows from the first commit to HEAD."
+    }
+  ]
+}

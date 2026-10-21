@@ -1,0 +1,19 @@
+{
+  "title": "XZ Utils, read like a tree",
+  "specimen": {
+    "binomial": "Lempelia ziv collinii",
+    "common": "XZ Utils (tukaani-project/xz), cut at HEAD",
+    "note": "Fifteen years of mostly thin rings grown by one main contributor, then a sudden thickening from 2022, much of it translations. A second long ray starts in 2022 Q2 and stops in 2024 Q1, the quarter of the 5.6.0 release. The next ring is the widest in the trunk: the backdoor removal and the clean-up that followed."
+  },
+  "events": [
+    { "period": "2007 Q4", "kind": "birth", "title": "Imported to git", "evidence": ["commit:5d018dc"] },
+    { "period": "2010 Q4", "kind": "milestone", "title": "XZ Utils 5.0.0", "evidence": ["tag:v5.0.0"] },
+    { "period": "2016 Q3", "kind": "quiet", "title": "An empty quarter", "note": "no commits" },
+    { "period": "2022 Q2", "kind": "arrival", "title": "Jia Tan's first commit", "note": "a second long ray begins", "evidence": ["commit:aa75c55"] },
+    { "period": "2022 Q4", "kind": "release", "title": "XZ Utils 5.4.0", "evidence": ["tag:v5.4.0", "commit:b69da6d"] },
+    { "period": "2024 Q1", "kind": "release", "title": "5.6.0 ships", "note": "the release later found backdoored", "evidence": ["tag:v5.6.0", "commit:a18fb1e"] },
+    { "period": "2024 Q2", "kind": "pruning", "title": "Backdoor removed", "note": "CVE-2024-3094; the widest ring", "evidence": ["commit:e93e13c"] },
+    { "period": "2026 Q4", "kind": "release", "title": "Cut at HEAD", "note": "Lasse Collin: 2,525 of 3,119 commits", "evidence": ["commit:299eb5c"] }
+  ],
+  "epilogue": "Seventy-seven quarterly rings. The figure records only what the repository records: who committed, when, and which lines changed. The backdoor note quotes the project's own commit message for e93e13c."
+}

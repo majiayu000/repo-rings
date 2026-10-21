@@ -1,0 +1,18 @@
+{
+  "title": "ccusage, read like a tree",
+  "specimen": {
+    "binomial": "Tokenia ryoppippii",
+    "common": "ccusage, the coding-agent usage CLI, cut at HEAD",
+    "note": "In May 2026 a native Rust CLI arrives and pulls the trunk hard towards rust/. Before that come a flush of growth in the first month and a thin winter; the outer weekly rings are the widest since the first summer."
+  },
+  "events": [
+    { "period": "2025-05-26", "kind": "birth", "title": "Implemented by Claude Code", "note": "the first commit message says so", "evidence": ["commit:0bf95c6", "tag:v0.1.0"] },
+    { "period": "2025-06-16", "kind": "surge", "title": "278 commits in one week", "note": "v9.0.0 to v15.0.0 in seven days", "evidence": ["tag:v9.0.0", "tag:v15.0.0", "commit:829fdbc"] },
+    { "period": "2025-09-15", "kind": "rewrite", "title": "Monorepo, and Codex", "note": "packages/ becomes apps/", "evidence": ["commit:4d8b2e1", "commit:c7156aa"] },
+    { "period": "2026-01-12", "kind": "quiet", "title": "Winter rings", "note": "six weeks, seven commits" },
+    { "period": "2026-05-18", "kind": "rewrite", "title": "A native Rust CLI", "note": "rust/ becomes the largest folder", "evidence": ["commit:a2ca34a", "tag:v20.0.0"] },
+    { "period": "2026-10-05", "kind": "surge", "title": "232 commits in a week", "note": "Codex, Copilot and OpenCode fixes", "evidence": ["commit:c9ede93", "tag:v20.0.30"] },
+    { "period": "2026-10-19", "kind": "release", "title": "v20.0.39 at the bark", "note": "165 tags in seventeen months", "evidence": ["commit:aa7c675"] }
+  ],
+  "epilogue": "Seventy-four weekly rings and 2,729 commits. Pricing snapshots and generated files sit inside rust/ too, which is part of why that folder dominates the outer wood; the ring reader lists each week's largest commits so you can see what is code and what is data."
+}

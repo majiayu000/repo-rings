@@ -1,0 +1,8 @@
+{
+  "name": "repo-rings",
+  "description": "Turn a git repository's history into a tree-ring cross-section poster that grows from the first commit to HEAD.",
+  "version": "0.1.0",
+  "author": { "name": "majiayu000" },
+  "license": "MIT",
+  "keywords": ["git", "visualization", "skill", "poster", "readme"]
+}

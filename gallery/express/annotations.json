@@ -1,0 +1,18 @@
+{
+  "title": "Express, read like a tree",
+  "specimen": {
+    "binomial": "Expressa holowaychukii",
+    "common": "Express (expressjs/express), the Node.js web framework, cut at HEAD",
+    "note": "The widest rings are the first two years: hundreds of commits a quarter on the road to 1.0. From 2015 the trunk settles into thin, even growth. The first v5 alpha sits in 2014 Q4, and the v5.0.0 bead only appears thirty-nine rings later."
+  },
+  "events": [
+    { "period": "2009 Q2", "kind": "birth", "title": "Initial commit", "evidence": ["commit:9998490"] },
+    { "period": "2010 Q3", "kind": "surge", "title": "556 commits to 1.0", "note": "the widest ring in the trunk", "evidence": ["tag:1.0.0beta", "commit:f97a222"] },
+    { "period": "2014 Q2", "kind": "milestone", "title": "Express 4.0.0", "note": "Douglas Christopher Wilson's ray begins", "evidence": ["tag:4.0.0", "commit:147c250"] },
+    { "period": "2014 Q4", "kind": "release", "title": "5.0.0-alpha.1", "note": "the final v5 is 39 rings further out", "evidence": ["tag:5.0.0-alpha.1"] },
+    { "period": "2016 Q3", "kind": "quiet", "title": "A two-commit quarter", "note": "the thinnest ring so far" },
+    { "period": "2024 Q3", "kind": "milestone", "title": "Express 5.0.0", "evidence": ["tag:v5.0.0"] },
+    { "period": "2026 Q4", "kind": "release", "title": "v5.3.0 at the bark", "note": "the outermost ring: HEAD", "evidence": ["tag:v5.3.0"] }
+  ],
+  "epilogue": "Seventy-one quarterly rings and 5,697 commits. Git records TJ Holowaychuk under three spellings (visionmedia, Tj and TJ), so the inner wood shows three rays for one person; repo-rings does not guess at merging names unless the repository ships a .mailmap."
+}

@@ -1,0 +1,19 @@
+{
+  "title": "Vue 2, read like a tree",
+  "specimen": {
+    "binomial": "Vista evanyouii",
+    "common": "Vue 2 (vuejs/vue), the archived line, cut at HEAD",
+    "note": "This history starts in April 2016 with a fresh init for Vue 2.0, so the pith is already a busy quarter. The rings narrow after 2.6, a scar marks the 2.7 TypeScript port, and the bark is a handful of commits after end of life. One long ray runs almost the whole way: Evan You wrote 2,575 of 3,580 commits."
+  },
+  "events": [
+    { "period": "2016 Q2", "kind": "birth", "title": "init: a fresh start", "note": "779 commits in the first quarter", "evidence": ["commit:a879ec0"] },
+    { "period": "2016 Q3", "kind": "milestone", "title": "Vue 2.0.0", "evidence": ["tag:v2.0.0"] },
+    { "period": "2019 Q1", "kind": "release", "title": "Vue 2.6", "evidence": ["tag:v2.6.0"] },
+    { "period": "2022 Q2", "kind": "rewrite", "title": "2.7: the TypeScript port", "note": "tests converted to TypeScript", "evidence": ["commit:534a0aa"] },
+    { "period": "2022 Q3", "kind": "release", "title": "Vue 2.7.0", "evidence": ["tag:v2.7.0", "commit:1e3a0ce"] },
+    { "period": "2023 Q3", "kind": "quiet", "title": "A silent quarter", "note": "no commits" },
+    { "period": "2023 Q4", "kind": "release", "title": "2.7.16, end of life", "note": "the EOL readme lands on 2023-12-31", "evidence": ["tag:v2.7.16", "commit:0191d50"] },
+    { "period": "2024 Q4", "kind": "quiet", "title": "Bark after EOL", "note": "one spelling fix" }
+  ],
+  "epilogue": "Thirty-five quarterly rings. Vue 3 lives in a different repository, vuejs/core, so this trunk stops growing at end of life rather than turning into the next version."
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Deliberately wrong notes for jq",
+  "specimen": { "binomial": "Filtrum falsum", "common": "a test fixture", "note": "Every event below breaks one rule." },
+  "events": [
+    { "period": "2018 Q4", "kind": "release", "title": "A release that never was", "evidence": ["tag:jq-9.9"] },
+    { "period": "2023 Q3", "kind": "surge", "title": "An invented commit", "evidence": ["commit:deadbee"] },
+    { "period": "2015 Q3", "kind": "rewrite", "title": "Right commit, wrong ring", "evidence": ["commit:a4eea16"] },
+    { "period": "2011 Q1", "kind": "birth", "title": "Before the first commit", "evidence": ["commit:a4eea16"] },
+    { "period": "2023 Q3", "kind": "quiet", "title": "Called quiet, 205 commits" },
+    { "period": "2014 Q2", "kind": "release", "title": "A release note with no evidence at all" }
+  ]
+}

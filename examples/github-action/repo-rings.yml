@@ -1,0 +1,46 @@
+# Re-draws the repo-rings image in your README once a month.
+# Copy this file to .github/workflows/repo-rings.yml in your own repository.
+# Before the first run, commit .github/repo-rings/annotations.json (write it once with the repo-rings skill,
+# using month labels such as "2024-08", because this workflow pins --unit month).
+name: repo-rings
+
+on:
+  schedule:
+    - cron: "17 3 1 * *" # 03:17 UTC on the 1st of every month
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rings:
+    runs-on: ubuntu-latest
+    env:
+      REPO_RINGS_REF: v0.1.0 # a release tag or commit of majiayu000/repo-rings
+      IMAGE: docs/repo-rings.svg
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history: repo-rings refuses shallow clones
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Fetch repo-rings
+        run: git clone --depth 1 --branch "$REPO_RINGS_REF" https://github.com/majiayu000/repo-rings "$RUNNER_TEMP/repo-rings"
+
+      - name: Render
+        run: |
+          SKILL="$RUNNER_TEMP/repo-rings/skills/repo-rings"
+          mkdir -p "$(dirname "$IMAGE")"
+          bun "$SKILL/scripts/extract.ts" . -o "$RUNNER_TEMP/rings.json" --unit month
+          bun "$SKILL/scripts/render.ts" "$RUNNER_TEMP/rings.json" .github/repo-rings/annotations.json \
+            -o "$RUNNER_TEMP/rings.html" --svg "$IMAGE"
+
+      - name: Commit if the image changed
+        run: |
+          git add "$IMAGE"
+          git diff --cached --quiet && { echo "image unchanged"; exit 0; }
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit --signoff -m "docs: refresh repo-rings image"
+          git push

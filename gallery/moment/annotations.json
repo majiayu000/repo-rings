@@ -1,0 +1,18 @@
+{
+  "title": "Moment.js, read like a tree",
+  "specimen": {
+    "binomial": "Tempus momentum woodii",
+    "common": "Moment.js, the JavaScript date library, cut at HEAD",
+    "note": "Six years of thick, steady rings, then the trunk thins. After 2.30 in late 2023 come ten quarters with a single commit between them, the longest pale band in the gallery, and in 2026 the tree puts on a new ring for 2.31."
+  },
+  "events": [
+    { "period": "2011 Q1", "kind": "birth", "title": "First commit", "evidence": ["commit:52e2408"] },
+    { "period": "2013 Q1", "kind": "milestone", "title": "Moment 2.0.0", "evidence": ["tag:2.0.0"] },
+    { "period": "2013 Q3", "kind": "surge", "title": "The widest ring", "note": "211 commits in one quarter", "evidence": ["tag:2.1.0", "tag:2.2.0"] },
+    { "period": "2020 Q2", "kind": "surge", "title": "A spring of releases", "note": "146 commits, 2.25.0 and on", "evidence": ["tag:2.25.0"] },
+    { "period": "2023 Q4", "kind": "release", "title": "2.30.1", "evidence": ["tag:2.30.1", "commit:485d9a7"] },
+    { "period": "2024 Q2", "kind": "quiet", "title": "Ten quiet quarters", "note": "2024 Q1 to 2026 Q2: one commit" },
+    { "period": "2026 Q3", "kind": "surge", "title": "Tooling renewed, 2.31.0", "note": "66 commits after the long quiet", "evidence": ["commit:791a476", "tag:2.31.0"] }
+  ],
+  "epilogue": "Sixty-four quarterly rings and 706 authors. The built bundles in min/ are left out (extract --exclude min/), so ring colour and shape follow the source, tests and locales rather than the release builds."
+}

@@ -1,0 +1,19 @@
+{
+  "title": "Bubble Tea, read like a tree",
+  "specimen": {
+    "binomial": "Bulla thea charmbraceletensis",
+    "common": "Bubble Tea, the Go TUI framework, cut at HEAD",
+    "note": "An event-loop rewrite in August 2024 cuts the widest ring, after three years of thinning growth. The 2020 sprint lays down the wide early rings, and the trunk is flat: most growth is in the repository root, with a second lobe towards examples/."
+  },
+  "events": [
+    { "period": "2020-01", "kind": "birth", "title": "First pass", "note": "65 commits in the first month", "evidence": ["commit:bee32ca"] },
+    { "period": "2020-05", "kind": "rewrite", "title": "Boba, then Bubble Tea", "note": "renamed twice; components move to bubbles", "evidence": ["commit:4bf40fb", "commit:3b8b011"] },
+    { "period": "2022-02", "kind": "pruning", "title": "cancelreader moves out", "note": "−1,021 lines against +436", "evidence": ["commit:515ef02", "tag:v0.20.0"] },
+    { "period": "2024-08", "kind": "surge", "title": "v1.0.0, new event loop", "note": "103 commits: the widest ring", "evidence": ["tag:v1.0.0", "commit:13ffcad"] },
+    { "period": "2024-12", "kind": "pruning", "title": "Input moves to x/input", "note": "−6,719 lines against +973", "evidence": ["commit:0806e01"] },
+    { "period": "2025-11", "kind": "release", "title": "v2 release candidates", "note": "imports move to charm.land", "evidence": ["tag:v2.0.0-rc.1", "commit:ff8c824"] },
+    { "period": "2026-02", "kind": "milestone", "title": "v2.0.0", "note": "six years after the first pass", "evidence": ["tag:v2.0.0"] },
+    { "period": "2026-10", "kind": "release", "title": "v2.1.0 at the bark", "note": "the outermost ring: HEAD", "evidence": ["tag:v2.1.0"] }
+  ],
+  "epilogue": "Eighty-two monthly rings. The pith is one person's first pass; the outer wood is a project with 178 authors and 109 tags. The figure counts only what git can prove: commits, lines and tags, with lockfiles and build output left out."
+}

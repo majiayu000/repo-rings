@@ -1,0 +1,19 @@
+{
+  "title": "jq, read like a tree",
+  "specimen": {
+    "binomial": "Filtrum jsonis dolani",
+    "common": "jq, the command-line JSON processor, cut at HEAD",
+    "note": "Wide early rings from 2012 to 2015, then a long band of hairline rings: after jq 1.6 in late 2018 the trunk barely grows for almost five years, with two quarters of no growth at all. In 2023 the project moves to the jqlang organisation and lays down its widest ring."
+  },
+  "events": [
+    { "period": "2012 Q3", "kind": "birth", "title": "Haskell out, C in", "note": "old Haskell code deleted, build cleaned up", "evidence": ["commit:a4eea16"] },
+    { "period": "2015 Q3", "kind": "release", "title": "jq 1.5, sources to src/", "evidence": ["tag:jq-1.5", "commit:0c93eb3"] },
+    { "period": "2018 Q4", "kind": "release", "title": "jq 1.6", "note": "the last release for almost five years", "evidence": ["tag:jq-1.6"] },
+    { "period": "2022 Q3", "kind": "quiet", "title": "Two empty quarters", "note": "2022 Q3 and Q4: no commits" },
+    { "period": "2023 Q2", "kind": "arrival", "title": "New home: jqlang", "note": "URLs move from stedolan to jqlang", "evidence": ["commit:89caf46"] },
+    { "period": "2023 Q3", "kind": "surge", "title": "jq 1.7, the widest ring", "note": "205 commits after the long gap", "evidence": ["tag:jq-1.7", "commit:ac3b70d"] },
+    { "period": "2025 Q1", "kind": "pruning", "title": "Bundled libraries move", "note": "oniguruma and decNumber go to vendor/", "evidence": ["commit:9727721"] },
+    { "period": "2026 Q4", "kind": "release", "title": "Cut at HEAD", "note": "22 commits so far this quarter", "evidence": ["commit:94b00aa"] }
+  ],
+  "epilogue": "Fifty-eight quarterly rings. Nicolas Williams and Stephen Dolan carry the inner wood; itchyny, Emanuele Torre and Mattias Wadman arrive with the revival. Thin rings are not a judgement on anyone: they are only how many commits landed."
+}
