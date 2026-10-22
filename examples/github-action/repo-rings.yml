@@ -1,7 +1,7 @@
 # Re-draws the repo-rings image in your README once a month.
 # Copy this file to .github/workflows/repo-rings.yml in your own repository.
-# Before the first run, commit .github/repo-rings/annotations.json (write it once with the repo-rings skill,
-# using month labels such as "2024-08", because this workflow pins --unit month).
+# Optional: commit .github/repo-rings/annotations.json (written once with the repo-rings skill, using month
+# labels such as "2024-08", because this workflow pins --unit month). Without it you get the bare tree.
 name: repo-rings
 
 on:
@@ -33,7 +33,9 @@ jobs:
           SKILL="$RUNNER_TEMP/repo-rings/skills/repo-rings"
           mkdir -p "$(dirname "$IMAGE")"
           bun "$SKILL/scripts/extract.ts" . -o "$RUNNER_TEMP/rings.json" --unit month
-          bun "$SKILL/scripts/render.ts" "$RUNNER_TEMP/rings.json" .github/repo-rings/annotations.json \
+          NOTES=.github/repo-rings/annotations.json
+          [ -f "$NOTES" ] || NOTES=""
+          bun "$SKILL/scripts/render.ts" "$RUNNER_TEMP/rings.json" $NOTES \
             -o "$RUNNER_TEMP/rings.html" --svg "$IMAGE"
 
       - name: Commit if the image changed

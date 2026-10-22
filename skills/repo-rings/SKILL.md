@@ -28,6 +28,8 @@ bun "$SKILL_DIR/scripts/extract.ts" <repo-dir> -o "$OUT/rings.json"
 - It refuses shallow clones, because a truncated history draws a false pith. Tell the user to run `git fetch --unshallow`, or ask before you do it.
 - To measure a repository the user has not cloned, a blobless clone is enough: `git clone --filter=blob:none --no-checkout <url>`, then `git -C <dir> backfill` (git 2.49+) so the line counts do not fetch blobs one commit at a time.
 
+If the user only wants a quick look, render now without notes: `bun "$SKILL_DIR/scripts/render.ts" "$OUT/rings.json" -o "$OUT/<repo>-rings.html"` draws the bare tree with a plain title. Then offer the annotated version.
+
 ### 2. Read the summary
 
 ```sh
@@ -94,12 +96,12 @@ for f in "$OUT"/frames/*.svg; do
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
     --window-size=1600,1100 --screenshot="${f%.svg}.png" "file://$f"
 done
-ffmpeg -framerate 12 -i "$OUT/frames/frame-%03d.png" \
-  -vf "tpad=stop_mode=clone:stop_duration=2.5,scale=800:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" \
+ffmpeg -loop 1 -t 1.5 -framerate 12 -i "$OUT/frames/frame-060.png" -framerate 12 -i "$OUT/frames/frame-%03d.png" \
+  -filter_complex "[0:v][1:v]concat=n=2:v=1[c];[c]tpad=stop_mode=clone:stop_duration=2.5,scale=800:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" \
   "$OUT/<repo>-rings.gif"
 ```
 
-That is about 600 KB at 800 px wide. For a smaller file use MP4: `ffmpeg -framerate 12 -i "$OUT/frames/frame-%03d.png" -vf "tpad=stop_mode=clone:stop_duration=2.5,scale=1200:-2" -pix_fmt yuv420p "$OUT/<repo>-rings.mp4"`. Delete the frames folder afterwards.
+The GIF opens on the finished tree for 1.5 s (that first frame is what previews show), then grows from the pith. It is about 800 KB at 800 px wide. For a smaller file use MP4: `ffmpeg -framerate 12 -i "$OUT/frames/frame-%03d.png" -vf "tpad=stop_mode=clone:stop_duration=2.5,scale=1200:-2" -pix_fmt yuv420p "$OUT/<repo>-rings.mp4"`. Delete the frames folder afterwards.
 
 ### 5. Check your work
 

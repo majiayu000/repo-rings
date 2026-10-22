@@ -1,6 +1,6 @@
 # Gallery specimens
 
-Each folder holds the `rings.json` extracted from a fresh clone, the `annotations.json` written for it, the rendered page and a thumbnail. `bun tools/build-gallery.ts` re-renders all of them and rewrites `index.html`; any note that fails the evidence check stops the build.
+Each folder holds the `rings.json` extracted from a fresh clone, the `annotations.json` written for it, the rendered page, a thumbnail and a preview image. `bun tools/build-gallery.ts` re-renders all of them and rewrites the site's `index.html`, `sitemap.xml` and `robots.txt`; any note that fails the evidence check stops the build.
 
 | Folder | Repository | HEAD | Last commit | Rings | Extract flags |
 | --- | --- | --- | --- | --- | --- |

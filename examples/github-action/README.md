@@ -6,8 +6,8 @@ It is an example. Nothing here runs until you copy it into your own repository.
 
 ## Set it up
 
-1. Run the repo-rings skill once on your repository and keep the `annotations.json` it wrote. Use month labels (`2024-08`) for every `period`, because the workflow pins `--unit month` so ring labels never change underneath your notes. If your skill run picked weeks or quarters, re-extract with `--unit month` and adjust the periods.
-2. Commit it as `.github/repo-rings/annotations.json`.
+1. Optional but recommended: run the repo-rings skill once on your repository and keep the `annotations.json` it wrote. Without it the workflow draws the bare tree, with no field notes. Use month labels (`2024-08`) for every `period`, because the workflow pins `--unit month` so ring labels never change underneath your notes. If your skill run picked weeks or quarters, re-extract with `--unit month` and adjust the periods.
+2. If you have notes, commit them as `.github/repo-rings/annotations.json`.
 3. Copy [`repo-rings.yml`](repo-rings.yml) to `.github/workflows/repo-rings.yml`.
 4. Put the image in your README:
 

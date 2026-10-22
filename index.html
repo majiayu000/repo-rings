@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>repo-rings: git history visualized as tree rings</title>
+<meta name="description" content="An agent skill for Claude Code, Codex and Cursor that turns any git repository's commit history into an animated tree-ring cross-section. Every note is checked against git. Gallery: jq, XZ Utils, Express, Moment.js, Vue 2 and more.">
+<link rel="canonical" href="https://majiayu000.github.io/repo-rings/">
+<meta property="og:type" content="website"><meta property="og:url" content="https://majiayu000.github.io/repo-rings/"><meta property="og:title" content="repo-rings: git history visualized as tree rings">
+<meta property="og:description" content="An agent skill for Claude Code, Codex and Cursor that turns any git repository's commit history into an animated tree-ring cross-section. Every note is checked against git. Gallery: jq, XZ Utils, Express, Moment.js, Vue 2 and more."><meta property="og:image" content="https://majiayu000.github.io/repo-rings/docs/og.png">
+<meta property="og:image:width" content="1280"><meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+:root{--bg:#efe8dc;--panel:#fbf7f0;--ink:#231d17;--mute:#7a6a58;--line:#d9cdbb;--accent:#b0612a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17130f;--panel:#221c16;--ink:#efe6d8;--mute:#a8987f;--line:#3a3027;--accent:#e59a55}}
+:root[data-theme="dark"]{--bg:#17130f;--panel:#221c16;--ink:#efe6d8;--mute:#a8987f;--line:#3a3027;--accent:#e59a55}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+.wrap{max-width:1240px;margin:0 auto;padding:36px 16px 64px}
+h1{margin:0;font-size:clamp(30px,5vw,48px);line-height:1.1;font-weight:600}
+h2{font-size:26px;margin:44px 0 6px;font-weight:600}
+.lede{max-width:64ch;color:var(--mute);margin:10px 0 18px;font-size:18px}
+a{color:var(--accent)}
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:center}
+@media (max-width:860px){.hero{grid-template-columns:1fr}}
+.hero img,.hero picture{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:#f4eee3}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font:14px ui-monospace,SFMono-Regular,Menlo,monospace;margin:8px 0}
+.links{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;gap:16px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:16px}
+.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;color:inherit;text-decoration:none;transition:border-color .2s,transform .2s}
+.card:hover,.card:focus-visible{border-color:var(--accent);transform:translateY(-2px)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.card{transition:none}.card:hover,.card:focus-visible{transform:none}}
+.card img{display:block;width:100%;height:auto;background:#f4eee3}
+.meta{padding:14px 18px 18px}
+.slug{font:600 15px ui-monospace,SFMono-Regular,Menlo,monospace}
+.bin{font-style:italic;font-size:20px;margin-top:2px}
+.stats{color:var(--mute);font:13px ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:4px}
+.meta p{margin:8px 0 0;font-size:15px}
+footer{margin-top:36px;color:var(--mute);font-size:14px;max-width:70ch}
+</style></head><body><div class="wrap">
+<div class="hero"><div>
+<h1>Git history, visualized as tree rings</h1>
+<p class="lede">repo-rings is an agent skill for Claude Code, Codex and Cursor. It cuts any git repository open like a tree: the pith is the first commit, the bark is HEAD, every ring is a week, month, quarter or year of commits. The page grows from the pith to the bark, and every field note on it cites a real tag or commit, checked against git before rendering.</p>
+<pre>npx skills add majiayu000/repo-rings</pre>
+<p>Then ask your agent: <em>“Draw the tree rings of this repository.”</em> No API keys, no network; needs git and Bun.</p>
+<div class="links"><a href="https://github.com/majiayu000/repo-rings">GitHub</a><a href="https://github.com/majiayu000/repo-rings/blob/main/docs/comparison.md">Compared with Gource, Git History and others</a><a href="https://github.com/majiayu000/repo-rings/tree/main/examples/github-action">Monthly README refresh</a></div>
+</div><picture><source srcset="assets/jq-rings.png" media="(prefers-reduced-motion: reduce)"><img src="assets/jq-rings.gif" width="800" height="550" alt="jq's git history growing as tree rings, from the first commit in 2012 to HEAD in 2026"></picture></div>
+<h2>Gallery</h2>
+<p class="lede">Famous open-source repositories, read like trees. Open one to watch it grow and to read any ring.</p>
+<div class="grid">
+<a class="card" href="gallery/bubbletea/bubbletea-rings.html">
+<img src="gallery/bubbletea/thumb.webp" width="600" height="600" alt="Tree-ring cross-section of charmbracelet/bubbletea's git history" loading="lazy">
+<div class="meta"><div class="slug">charmbracelet/bubbletea</div><div class="bin">Bulla thea charmbraceletensis</div>
+<div class="stats">82 month rings · 1,796 commits · 2020–2026</div>
+<p>An event-loop rewrite in August 2024 cuts the widest ring, after three years of thinning growth.</p></div></a>
+<a class="card" href="gallery/ccusage/ccusage-rings.html">
+<img src="gallery/ccusage/thumb.webp" width="600" height="600" alt="Tree-ring cross-section of ryoppippi/ccusage's git history" loading="lazy">
+<div class="meta"><div class="slug">ryoppippi/ccusage</div><div class="bin">Tokenia ryoppippii</div>
+<div class="stats">74 week rings · 2,729 commits · 2025–2026</div>
+<p>In May 2026 a native Rust CLI arrives and pulls the trunk hard towards rust/.</p></div></a>
+<a class="card" href="gallery/express/express-rings.html">
+<img src="gallery/express/thumb.webp" width="600" height="600" alt="Tree-ring cross-section of expressjs/express's git history" loading="lazy">
+<div class="meta"><div class="slug">expressjs/express</div><div class="bin">Expressa holowaychukii</div>
+<div class="stats">71 quarter rings · 5,697 commits · 2009–2026</div>
+<p>The widest rings are the first two years: hundreds of commits a quarter on the road to 1.0.</p></div></a>
+<a class="card" href="gallery/jq/jq-rings.html">
+<img src="gallery/jq/thumb.webp" width="600" height="600" alt="Tree-ring cross-section of jqlang/jq's git history" loading="lazy">
+<div class="meta"><div class="slug">jqlang/jq</div><div class="bin">Filtrum jsonis dolani</div>
+<div class="stats">58 quarter rings · 1,884 commits · 2012–2026</div>
+<p>Wide early rings from 2012 to 2015, then a long band of hairline rings: after jq 1.6 in late 2018 the trunk barely grows for almost five years, with two quarters of no growth at all.</p></div></a>
+<a class="card" href="gallery/moment/moment-rings.html">
+<img src="gallery/moment/thumb.webp" width="600" height="600" alt="Tree-ring cross-section of moment/moment's git history" loading="lazy">
+<div class="meta"><div class="slug">moment/moment</div><div class="bin">Tempus momentum woodii</div>
+<div class="stats">64 quarter rings · 3,118 commits · 2011–2026</div>
+<p>Six years of thick, steady rings, then the trunk thins.</p></div></a>
+<a class="card" href="gallery/vue/vue-rings.html">
+<img src="gallery/vue/thumb.webp" width="600" height="600" alt="Tree-ring cross-section of vuejs/vue's git history" loading="lazy">
+<div class="meta"><div class="slug">vuejs/vue</div><div class="bin">Vista evanyouii</div>
+<div class="stats">35 quarter rings · 3,580 commits · 2016–2024</div>
+<p>This history starts in April 2016 with a fresh init for Vue 2.0, so the pith is already a busy quarter.</p></div></a>
+<a class="card" href="gallery/xz/xz-rings.html">
+<img src="gallery/xz/thumb.webp" width="600" height="600" alt="Tree-ring cross-section of tukaani-project/xz's git history" loading="lazy">
+<div class="meta"><div class="slug">tukaani-project/xz</div><div class="bin">Lempelia ziv collinii</div>
+<div class="stats">77 quarter rings · 3,119 commits · 2007–2026</div>
+<p>Fifteen years of mostly thin rings grown by one main contributor, then a sudden thickening from 2022, much of it translations.</p></div></a>
+</div>
+<footer>Histories were read from fresh clones in October 2026. Lockfiles and build output are not counted. Thin rings only mean fewer commits; they are not a judgement on anyone's work. MIT licensed.</footer>
+</div></body></html>

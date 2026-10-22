@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 // Render rings.json + annotations.json into one self-contained HTML page (and optionally a bare SVG).
-// Usage: bun render.ts rings.json annotations.json -o page.html [--svg figure.svg] [--frames dir]
+// Usage: bun render.ts rings.json [annotations.json] -o page.html [--svg figure.svg] [--frames dir]
+// Without annotations.json it draws the bare tree: a plain title and specimen card, no field notes.
 // --frames writes the growth animation as numbered SVG frames (for a GIF or video, see SKILL.md).
 // Every annotation is checked against rings.json; a claim that cannot be found there stops the build.
 
@@ -10,16 +11,24 @@ const argv = process.argv.slice(2);
 const opt = (n: string) => { const i = argv.indexOf(n); return i === -1 ? undefined : argv[i + 1]; };
 const pos = argv.filter((a, i) => !a.startsWith("-") && !["-o", "--svg", "--frames"].includes(argv[i - 1]));
 function fail(msg: string): never { process.stderr.write(`render: ${msg}\n`); process.exit(1); }
-if (pos.length < 2) fail("usage: bun render.ts rings.json annotations.json -o page.html [--svg figure.svg] [--frames dir]");
+if (pos.length < 1) fail("usage: bun render.ts rings.json [annotations.json] -o page.html [--svg figure.svg] [--frames dir]");
 const outHtml = opt("-o") ?? "rings.html";
 const outSvg = opt("--svg");
 const outFrames = opt("--frames");
 const FRAMES = 60;
 
 const D: Rings = await Bun.file(pos[0]).json();
-const A: Annotations = await Bun.file(pos[1]).json();
 const P: Period[] = D.periods;
 const N = P.length;
+const A: Annotations = pos[1] ? await Bun.file(pos[1]).json() : {
+  title: `${D.repo.name}, read like a tree`,
+  specimen: {
+    binomial: D.repo.name,
+    common: `${D.repo.remote ?? D.repo.name}, cut at HEAD`,
+    note: `${N} ${D.unit} rings and ${D.totals.commits.toLocaleString("en-US")} commits by ${D.totals.authors} authors, from ${D.repo.firstCommit} to ${D.repo.lastCommit}.`,
+  },
+  events: [],
+};
 
 // ---------- validate annotations ----------
 const problems: string[] = [];
@@ -325,7 +334,8 @@ const eventsHtml = A.events.map((e) => {
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(A.title)}</title>
-<meta name="description" content="${esc(`${D.repo.name}: ${N} ${unitWord[D.unit]} rings, ${D.totals.commits} commits, ${D.totals.authors} authors, read like a tree.`)}">
+${(() => { const d = esc(`${D.repo.name}: ${N} ${unitWord[D.unit]} rings, ${D.totals.commits} commits, ${D.totals.authors} authors, read like a tree.`);
+  return `<meta name="description" content="${d}">\n<meta property="og:type" content="article"><meta property="og:title" content="${esc(A.title)}"><meta property="og:description" content="${d}"><meta name="twitter:card" content="summary_large_image">`; })()}
 <style>
 :root{--bg:#efe8dc;--panel:#fbf7f0;--ink:#231d17;--mute:#7a6a58;--line:#d9cdbb;--accent:#b0612a}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17130f;--panel:#221c16;--ink:#efe6d8;--mute:#a8987f;--line:#3a3027;--accent:#e59a55}}
@@ -392,7 +402,7 @@ a{color:var(--accent)}
 <div class="sw" style="background:linear-gradient(90deg,transparent 30%,#f6e3c3 30%,#f6e3c3 70%,transparent 70%),#b07843"></div><div>Ray = a top contributor, from their first ring to their last.</div>
 </div>${D.excludedGenerated ? `<p class="sub">Lockfiles, build output and snapshots are not counted.</p>` : ""}${D.excludedPaths?.length ? `<p class="sub">Also left out: ${esc(D.excludedPaths.join(", "))}</p>` : ""}</section>
 </div>
-<section class="card" style="margin-top:16px"><h2>Field notes</h2><ol class="events">${eventsHtml}</ol></section>
+${eventsHtml ? `<section class="card" style="margin-top:16px"><h2>Field notes</h2><ol class="events">${eventsHtml}</ol></section>` : ""}
 ${A.epilogue ? `<p class="epi">${esc(A.epilogue)}</p>` : ""}
 </div>
 <script>
