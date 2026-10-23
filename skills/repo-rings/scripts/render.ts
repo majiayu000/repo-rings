@@ -48,10 +48,20 @@ for (const [i, e] of (A.events ?? []).entries()) {
     if (p.commits > 2) problems.push(`events[${i}] is "quiet" but ${e.period} has ${p.commits} commits`);
   } else if (!ev.length) problems.push(`events[${i}] needs evidence: ["tag:<name>"] or ["commit:<hash>"] from ${e.period}`);
   for (const x of ev) {
-    const [kind, val] = String(x).split(/:(.+)/);
+    const text = String(x), colon = text.indexOf(":");
+    const kind = colon < 0 ? text : text.slice(0, colon), val = colon < 0 ? "" : text.slice(colon + 1);
     if (kind === "tag" && !p.tags.includes(val)) problems.push(`events[${i}] evidence ${x} is not a tag in ${e.period}`);
-    else if (kind === "commit" && !(val?.length >= 7 && p.log.some((c) => c.h.startsWith(val.slice(0, 7)))))
-      problems.push(`events[${i}] evidence ${x} is not a commit in ${e.period}`);
+    else if (kind === "commit") {
+      const matches = val.length >= 7 && !/[^0-9a-f]/.test(val) ? p.log.filter((c) => {
+        const h = c.fullHash ?? c.h;
+        // A legacy short hash is a possible match, but cannot verify an extra suffix.
+        return h.startsWith(val) || (c.fullHash == null && val.startsWith(h));
+      }) : [];
+      if (!matches.length) problems.push(`events[${i}] evidence ${x} is not a commit in ${e.period}`);
+      else if (matches.length > 1) problems.push(`events[${i}] evidence ${x} is ambiguous in ${e.period}; use a longer hash, or re-run extract.ts for legacy data`);
+      else if (matches[0].fullHash == null && val.length > matches[0].h.length)
+        problems.push(`events[${i}] evidence ${x} cannot be verified from the stored short hash in ${e.period}; re-run extract.ts to record full commit hashes`);
+    }
     else if (kind !== "tag" && kind !== "commit") problems.push(`events[${i}] evidence "${x}" must start with tag: or commit:`);
   }
 }

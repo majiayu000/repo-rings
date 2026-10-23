@@ -62,6 +62,7 @@ Rules, all enforced by the renderer (it stops with a list of problems):
 - `period` must be a ring label exactly as in `rings.json` (`2020-05`, `2025-06-16`, `2021 Q3`, `2019`).
 - `kind` is one of `birth`, `release`, `surge`, `rewrite`, `pruning`, `quiet`, `arrival`, `milestone`.
 - Every event except `quiet` needs `evidence`: `tag:<name>` or `commit:<hash, 7+ chars>` that exists **in that ring**. A `quiet` event is only accepted on a ring with 2 commits or fewer.
+- Commit evidence must be lowercase hexadecimal and uniquely match one log entry in that ring, using every supplied character. New extractions retain `fullHash` alongside the short display hash `h`. Older `rings.json` files still accept unique stored short hashes; longer citations cannot be verified from those alone, so re-run `extract.ts` before using them. Ambiguous prefixes need a longer hash (and re-extraction if the old data only has short hashes).
 - `title` at most 28 characters, `note` at most 46. They are callouts on a poster, not paragraphs.
 
 Writing guidance:
