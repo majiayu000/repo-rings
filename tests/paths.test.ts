@@ -1,6 +1,6 @@
 // Git quotes unusual paths unless --numstat uses NUL-delimited records.
 import { test, expect, beforeAll, afterAll } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -8,6 +8,8 @@ const dir = mkdtempSync(join(tmpdir(), "repo-rings-paths-"));
 const unicodeRepo = join(dir, "unicode");
 const unusualRepo = join(dir, "unusual");
 const renamedRepo = join(dir, "renamed");
+const byteRepo = join(dir, "bytes");
+const dominantByteRepo = join(dir, "dominant-bytes");
 const script = join(import.meta.dir, "../skills/repo-rings/scripts/extract.ts");
 const unusualDirs = ['quote"', "back\\slash", "tab\tfolder", "line\nfolder", "record\x1efolder", "unit\x1ffolder", "emoji😀", "space folder"];
 const env = {
@@ -23,6 +25,11 @@ function git(repo: string, args: string[], date?: string) {
   if (p.exitCode !== 0) throw new Error(p.stderr.toString());
 }
 const lines = (n: number) => "line\n".repeat(n);
+function writeBytePath(repo: string, path: Buffer, count: number) {
+  const fullPath = Buffer.concat([Buffer.from(`${repo}/`), path]);
+  mkdirSync(fullPath.subarray(0, fullPath.lastIndexOf(0x2f)), { recursive: true });
+  writeFileSync(fullPath, lines(count));
+}
 async function init(repo: string) {
   const p = Bun.spawnSync(["git", "init", "-q", "-b", "main", repo], { env, stdout: "pipe", stderr: "pipe" });
   if (p.exitCode !== 0) throw new Error(p.stderr.toString());
@@ -40,6 +47,27 @@ async function extract(repo: string, extra: string[] = [], quotePath = "true") {
 }
 
 beforeAll(async () => {
+  // Raw-byte filenames are a POSIX facility; the existing Unicode tests also run on Windows.
+  if (process.platform !== "win32") {
+    await init(byteRepo);
+    for (const [folder, count] of [["ff", 2], ["fe", 3], ["efbfbd", 5]] as const)
+      writeBytePath(byteRepo, Buffer.concat([Buffer.from(folder, "hex"), Buffer.from("/a.txt")]), count);
+    writeBytePath(byteRepo, Buffer.from("ff2f646973742f62756e646c652e6a73", "hex"), 7);
+    writeBytePath(byteRepo, Buffer.from("fe2f7061636b6167652d6c6f636b2e6a736f6e", "hex"), 11);
+    git(byteRepo, ["add", "."]);
+    git(byteRepo, ["commit", "-qm", "add byte paths, 中文 and 😀"], "2024-02-10T12:00:00Z");
+
+    await init(dominantByteRepo);
+    for (const [folder, count] of [
+      [Buffer.from([0xff]), 20], [Buffer.from([0xfe]), 21],
+      [Buffer.from([0xc3, 0x28]), 22], [Buffer.from([0xc3]), 23],
+      [Buffer.from([0xed, 0xa0, 0x80]), 24], [Buffer.from([0xc0, 0xaf]), 25],
+      [Buffer.from("%FF"), 26], [Buffer.from("\\xff"), 27],
+      [Buffer.from("文档"), 28], [Buffer.from("\ufeffBOM"), 29],
+    ] as const) writeBytePath(dominantByteRepo, Buffer.concat([Buffer.from("src/"), folder, Buffer.from("/a.txt")]), count);
+    git(dominantByteRepo, ["add", "."]);
+    git(dominantByteRepo, ["commit", "-qm", "add distinct nested byte paths"]);
+  }
   await init(unicodeRepo);
   for (const [path, count] of Object.entries({ "docs/中文.md": 20, "文档/说明.md": 3, "dist/中文.js": 30, "中文/package-lock.json": 40 }))
     await Bun.write(join(unicodeRepo, path), lines(count));
@@ -118,4 +146,43 @@ test("modifications, deletions and renames keep their commit and period counts",
   // --no-renames deliberately counts a move as deletion from the old folder and addition to the new one.
   expect(d.periods[2].sectors["docs/"]).toEqual({ add: 0, del: 4 });
   expect(d.periods[2].sectors["文档/"]).toEqual({ add: 4, del: 0 });
+});
+
+
+const byteTest = process.platform === "win32" ? test.skip : test;
+byteTest("invalid UTF-8 byte paths stay distinct from each other and the replacement character", async () => {
+  const d = await extract(byteRepo);
+  expect(d.totals).toMatchObject({ commits: 2, added: 20, deleted: 0 });
+  expect(d.sectors).toEqual([
+    { key: "src/", churn: 10 }, { key: "�/", churn: 5 },
+    { key: "%FE/", churn: 3 }, { key: "%FF/", churn: 2 },
+  ]);
+  expect(d.periods[1].sectors["%FF/"]).toEqual({ add: 2, del: 0 });
+  expect(d.periods[1].sectors["%FE/"]).toEqual({ add: 3, del: 0 });
+  expect(d.periods[1].sectors["�/"]).toEqual({ add: 5, del: 0 });
+  expect(d.periods[1].log[0].s).toBe("add byte paths, 中文 and 😀");
+  expect(await extract(byteRepo, [], "false")).toEqual(d);
+});
+
+byteTest("--exclude compares original path bytes, not lossy Unicode labels", async () => {
+  const d = await extract(byteRepo, ["--exclude", "�/"]);
+  expect(d.totals.added).toBe(15);
+  expect(d.sectors.map((s: { key: string }) => s.key).sort()).toEqual(["%FE/", "%FF/", "src/"]);
+  const ascii = await extract(byteRepo, ["--exclude", "src/"]);
+  expect(ascii.totals.added).toBe(10);
+  const kept = await extract(byteRepo, ["--keep-generated"]);
+  expect(kept.totals.added).toBe(38);
+});
+
+byteTest("byte labels remain collision-free when a dominant folder is split", async () => {
+  const d = await extract(dominantByteRepo);
+  expect(d.totals.added).toBe(255);
+  expect(d.sectors.map((s: { key: string }) => s.key).sort()).toEqual([
+    "src/", "src/%FF/", "src/%FE/", "src/%C3%28/", "src/%C3/",
+    "src/%ED%A0%80/", "src/%C0%AF/", "src/%25FF/", "src/\\xff/",
+    "src/文档/", "src/\ufeffBOM/",
+  ].sort());
+  const excluded = await extract(dominantByteRepo, ["--exclude", "src/%FF/,src/\\xff/,src/文档/"]);
+  expect(excluded.totals.added).toBe(174);
+  expect(excluded.periods[0].sectors["src/%FF/"]).toEqual({ add: 20, del: 0 });
 });
