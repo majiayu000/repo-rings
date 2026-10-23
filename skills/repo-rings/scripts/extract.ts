@@ -51,25 +51,27 @@ if (git(["rev-parse", "--is-shallow-repository"]).trim() === "true")
   fail("repository is a shallow clone; history would be truncated. Run `git fetch --unshallow` first.");
 
 const RS = "\x1e", US = "\x1f";
-const logArgs = ["log", "--no-merges", "--numstat", "--no-renames", `--format=${RS}%H${US}%at${US}%aN${US}%s`];
+const logArgs = ["log", "--no-merges", "--numstat", "-z", "--no-renames", `--format=${RS}%H${US}%at${US}%aN${US}%s`];
 if (since) logArgs.push(`--since=${since}`);
 const raw = git(logArgs);
 
 const commits: Commit[] = [];
-for (const chunk of raw.split(RS)) {
-  if (!chunk.trim()) continue;
-  const [head, ...lines] = chunk.split("\n");
-  const [h, at, a, s] = head.split(US);
-  const files: Commit["files"] = [];
-  for (const line of lines) {
-    const m = line.match(/^(\d+|-)\t(\d+|-)\t(.+)$/);
-    if (!m) continue;
-    const p = m[3];
-    if (!keepGenerated && GENERATED.some((r) => r.test(p))) continue;
-    if (exclude.some((x) => p.startsWith(x))) continue;
-    files.push({ p, add: m[1] === "-" ? 0 : +m[1], del: m[2] === "-" ? 0 : +m[2] });
+let current: Commit | undefined;
+// -z leaves paths unquoted and separates records without splitting literal newlines or RS in filenames.
+for (const record of raw.split("\0")) {
+  if (record.startsWith(RS)) {
+    const [h, at, a, s] = record.slice(1).split(US);
+    current = { h, t: +at * 1000, a, s, files: [] };
+    commits.push(current);
+    continue;
   }
-  commits.push({ h, t: +at * 1000, a, s, files });
+  // Git inserts a newline before the first numstat record after a commit header.
+  const m = record.match(/^\n?(\d+|-)\t(\d+|-)\t([\s\S]+)$/);
+  if (!current || !m) continue;
+  const p = m[3];
+  if (!keepGenerated && GENERATED.some((r) => r.test(p))) continue;
+  if (exclude.some((x) => p.startsWith(x))) continue;
+  current.files.push({ p, add: m[1] === "-" ? 0 : +m[1], del: m[2] === "-" ? 0 : +m[2] });
 }
 if (commits.length < 2) fail(`only ${commits.length} commit(s) found; need at least 2 to grow rings`);
 commits.sort((x, y) => x.t - y.t);
