@@ -167,7 +167,7 @@ for (let s = periodStart(commits[0].t); s.getTime() <= last.getTime(); s = nextS
       sec.add += f.add; sec.del += f.del;
       p.added += f.add; p.deleted += f.del; cc += f.add + f.del;
     }
-    p.log.push({ h: c.h.slice(0, 7), s: c.s.slice(0, 100), a: c.a, churn: cc });
+    p.log.push({ h: c.h.slice(0, 7), fullHash: c.h, s: c.s.slice(0, 100), a: c.a, churn: cc });
   }
   p.authors = authors.size;
   p.tags = tags.filter((t) => t.t >= s.getTime() && t.t < e).map((t) => t.name);

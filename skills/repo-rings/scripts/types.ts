@@ -1,6 +1,7 @@
 // Shapes of rings.json (written by extract.ts) and annotations.json (written by the agent).
 
-export type LogEntry = { h: string; s: string; a: string; churn: number };
+// h stays short for display; fullHash is absent in older extracted datasets.
+export type LogEntry = { h: string; fullHash?: string; s: string; a: string; churn: number };
 
 export type Period = {
   index: number; label: string; start: string; commits: number; added: number; deleted: number;

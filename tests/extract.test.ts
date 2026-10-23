@@ -53,6 +53,17 @@ test("auto unit picks weeks for a short history", async () => {
   expect(d.periods[0].label).toBe("2024-01-08");
 });
 
+test("logs retain the full commit identity alongside the short display hash", async () => {
+  const { p, d } = await extract(["--unit", "month"]);
+  expect(p.exitCode).toBe(0);
+  const hashes = Bun.spawnSync(["git", "-C", repo, "log", "--reverse", "--format=%H"], { stdout: "pipe", stderr: "pipe" });
+  expect(hashes.exitCode).toBe(0);
+  const expected = hashes.stdout.toString().trim().split("\n");
+  const log = d.periods.flatMap((period: { log: { h: string; fullHash?: string }[] }) => period.log);
+  expect(log.map((c: { fullHash?: string }) => c.fullHash)).toEqual(expected);
+  expect(log.map((c: { h: string }) => c.h)).toEqual(expected.map((h: string) => h.slice(0, 7)));
+});
+
 test("--exclude leaves path prefixes out of the line counts", async () => {
   const { d } = await extract(["--unit", "month", "--exclude", "min/"]);
   expect(d.totals.added).toBe(15);
