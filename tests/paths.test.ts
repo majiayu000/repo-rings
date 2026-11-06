@@ -1,6 +1,6 @@
 // Git quotes unusual paths unless --numstat uses NUL-delimited records.
 import { test, expect, beforeAll, afterAll } from "bun:test";
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -26,9 +26,17 @@ function git(repo: string, args: string[], date?: string) {
 }
 const lines = (n: number) => "line\n".repeat(n);
 function writeBytePath(repo: string, path: Buffer, count: number) {
-  const fullPath = Buffer.concat([Buffer.from(`${repo}/`), path]);
-  mkdirSync(fullPath.subarray(0, fullPath.lastIndexOf(0x2f)), { recursive: true });
-  writeFileSync(fullPath, lines(count));
+  // Build the Git index directly: APFS cannot create invalid UTF-8 file names,
+  // but Git history can contain them and the extractor must still read them.
+  const blob = Bun.spawnSync(["git", "-C", repo, "hash-object", "-w", "--stdin"], {
+    env, stdin: Buffer.from(lines(count)), stdout: "pipe", stderr: "pipe",
+  });
+  if (blob.exitCode !== 0) throw new Error(blob.stderr.toString());
+  const entry = Buffer.concat([Buffer.from(`100644 ${blob.stdout.toString().trim()}\t`), path, Buffer.from([0])]);
+  const staged = Bun.spawnSync(["git", "-C", repo, "update-index", "-z", "--index-info"], {
+    env, stdin: entry, stdout: "pipe", stderr: "pipe",
+  });
+  if (staged.exitCode !== 0) throw new Error(staged.stderr.toString());
 }
 async function init(repo: string) {
   const p = Bun.spawnSync(["git", "init", "-q", "-b", "main", repo], { env, stdout: "pipe", stderr: "pipe" });
@@ -47,14 +55,13 @@ async function extract(repo: string, extra: string[] = [], quotePath = "true") {
 }
 
 beforeAll(async () => {
-  // Raw-byte filenames are a POSIX facility; the existing Unicode tests also run on Windows.
+  // Stage raw paths without asking the worktree filesystem to represent them.
   if (process.platform !== "win32") {
     await init(byteRepo);
     for (const [folder, count] of [["ff", 2], ["fe", 3], ["efbfbd", 5]] as const)
       writeBytePath(byteRepo, Buffer.concat([Buffer.from(folder, "hex"), Buffer.from("/a.txt")]), count);
     writeBytePath(byteRepo, Buffer.from("ff2f646973742f62756e646c652e6a73", "hex"), 7);
     writeBytePath(byteRepo, Buffer.from("fe2f7061636b6167652d6c6f636b2e6a736f6e", "hex"), 11);
-    git(byteRepo, ["add", "."]);
     git(byteRepo, ["commit", "-qm", "add byte paths, 中文 and 😀"], "2024-02-10T12:00:00Z");
 
     await init(dominantByteRepo);
@@ -65,7 +72,6 @@ beforeAll(async () => {
       [Buffer.from("%FF"), 26], [Buffer.from("\\xff"), 27],
       [Buffer.from("文档"), 28], [Buffer.from("\ufeffBOM"), 29],
     ] as const) writeBytePath(dominantByteRepo, Buffer.concat([Buffer.from("src/"), folder, Buffer.from("/a.txt")]), count);
-    git(dominantByteRepo, ["add", "."]);
     git(dominantByteRepo, ["commit", "-qm", "add distinct nested byte paths"]);
   }
   await init(unicodeRepo);
