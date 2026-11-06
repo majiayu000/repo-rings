@@ -24,7 +24,8 @@ bun "$SKILL_DIR/scripts/extract.ts" <repo-dir> -o "$OUT/rings.json"
 - `--unit auto|week|month|quarter|year`. Auto picks weeks under 2 years of history, months up to 7 years, then quarters, then years, so the trunk has roughly 25 to 90 rings.
 - `--sectors 3..12` (default 8): how many folders get a direction around the trunk. When one top-level folder holds most of the change (for example `src/` or `packages/`), it is split one level deeper automatically.
 - `--since YYYY-MM-DD` to cut a younger trunk. `--keep-generated` to count lockfiles and build output (skipped by default).
-- `--exclude min/,site/` leaves out path prefixes, for build output a project commits under its own name. Mention it in the epilogue.
+- `--exclude min/,site/` leaves out literal path prefixes, for build output a project commits under its own name. Mention it in the epilogue.
+- Folder labels preserve Unicode. Non-UTF-8 folder components use uppercase `%HH` byte escapes; literal `%` is shown as `%25` so labels cannot collide. `--exclude` still matches the original path, not its escaped label.
 - It refuses shallow clones, because a truncated history draws a false pith. Tell the user to run `git fetch --unshallow`, or ask before you do it.
 - To measure a repository the user has not cloned, a blobless clone is enough: `git clone --filter=blob:none --no-checkout <url>`, then `git -C <dir> backfill` (git 2.49+) so the line counts do not fetch blobs one commit at a time.
 

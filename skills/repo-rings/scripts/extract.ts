@@ -30,6 +30,7 @@ const since = flag("--since");
 const keepGenerated = args.includes("--keep-generated");
 // Path prefixes to leave out, for build output a project commits under its own name (e.g. moment's min/).
 const exclude = (flag("--exclude") ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+const excludeBytes = exclude.map((x) => Buffer.from(x).toString("latin1"));
 if (!["auto", "week", "month", "quarter", "year"].includes(unitArg)) fail(`unknown --unit ${unitArg}`);
 if (!Number.isInteger(sectorCount) || sectorCount < 3 || sectorCount > 12) fail("--sectors must be an integer 3..12");
 
@@ -41,13 +42,13 @@ const GENERATED = [
   /\.snap$/,
 ];
 
-function git(argv: string[]): string {
+function git(argv: string[]): Buffer {
   const p = Bun.spawnSync(["git", "-C", repo!, ...argv], { stdout: "pipe", stderr: "pipe" });
   if (p.exitCode !== 0) fail(`git ${argv[0]} failed: ${p.stderr.toString().trim()}`);
-  return p.stdout.toString();
+  return p.stdout;
 }
 
-if (git(["rev-parse", "--is-shallow-repository"]).trim() === "true")
+if (git(["rev-parse", "--is-shallow-repository"]).toString().trim() === "true")
   fail("repository is a shallow clone; history would be truncated. Run `git fetch --unshallow` first.");
 
 const RS = "\x1e", US = "\x1f";
@@ -57,20 +58,24 @@ const raw = git(logArgs);
 
 const commits: Commit[] = [];
 let current: Commit | undefined;
-// -z leaves paths unquoted and separates records without splitting literal newlines or RS in filenames.
-for (const record of raw.split("\0")) {
-  if (record.startsWith(RS)) {
-    const [h, at, a, s] = record.slice(1).split(US);
+// Frame the log before decoding: Git paths are bytes, not necessarily UTF-8.
+for (let start = 0, end = 0; start < raw.length; start = end + 1) {
+  end = raw.indexOf(0, start);
+  if (end === -1) end = raw.length;
+  const bytes = raw.subarray(start, end);
+  if (bytes[0] === 0x1e) {
+    const [h, at, a, s] = bytes.subarray(1).toString().split(US);
     current = { h, t: +at * 1000, a, s, files: [] };
     commits.push(current);
     continue;
   }
   // Git inserts a newline before the first numstat record after a commit header.
-  const m = record.match(/^\n?(\d+|-)\t(\d+|-)\t([\s\S]+)$/);
+  // Latin-1 is only a reversible byte carrier for paths and ASCII numstat fields.
+  const m = bytes.toString("latin1").match(/^\n?(\d+|-)\t(\d+|-)\t([\s\S]+)$/);
   if (!current || !m) continue;
   const p = m[3];
   if (!keepGenerated && GENERATED.some((r) => r.test(p))) continue;
-  if (exclude.some((x) => p.startsWith(x))) continue;
+  if (excludeBytes.some((x) => p.startsWith(x))) continue;
   current.files.push({ p, add: m[1] === "-" ? 0 : +m[1], del: m[2] === "-" ? 0 : +m[2] });
 }
 if (commits.length < 2) fail(`only ${commits.length} commit(s) found; need at least 2 to grow rings`);
@@ -135,9 +140,21 @@ const sectorOf = (p: string) => {
 };
 const sectorKeys = ranked.length > sectorCount ? [...keep, "(other)"] : keep;
 
+// JSON labels keep valid Unicode readable, but must never merge distinct byte keys.
+// Escape whole non-UTF-8 components as %HH and literal % as %25 to avoid collisions.
+const utf8 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
+function sectorLabel(key: string): string {
+  return key.split("/").map((part) => {
+    const bytes = Buffer.from(part, "latin1");
+    try { return utf8.decode(bytes).replaceAll("%", "%25"); }
+    catch { return Array.from(bytes, (b) => `%${b.toString(16).padStart(2, "0").toUpperCase()}`).join(""); }
+  }).join("/");
+}
+const sectorLabels = new Map(sectorKeys.map((k) => [k, sectorLabel(k)]));
+
 // ---- tags ----
 const tagRaw = git(["for-each-ref", "refs/tags", "--format=%(refname:short)%09%(creatordate:unix)%09%(*objectname)%(objectname)"]);
-const tags = tagRaw.split("\n").filter(Boolean).map((l) => {
+const tags = tagRaw.toString().split("\n").filter(Boolean).map((l) => {
   const [name, ts] = l.split("\t");
   return { name, t: +ts * 1000 };
 }).filter((x) => x.t >= commits[0].t && x.t <= nextStart(periodStart(commits[commits.length - 1].t)).getTime());
@@ -151,7 +168,7 @@ for (let s = periodStart(commits[0].t); s.getTime() <= last.getTime(); s = nextS
   const e = nextStart(s).getTime();
   const p: Period = {
     index: periods.length, label: label(s), start: s.toISOString().slice(0, 10), commits: 0, added: 0, deleted: 0,
-    authors: 0, newAuthors: [], sectors: Object.fromEntries(sectorKeys.map((k) => [k, { add: 0, del: 0 }])), tags: [], log: [],
+    authors: 0, newAuthors: [], sectors: Object.fromEntries(sectorKeys.map((k) => [sectorLabels.get(k)!, { add: 0, del: 0 }])), tags: [], log: [],
   };
   const authors = new Set<string>();
   while (ci < commits.length && commits[ci].t < e) {
@@ -163,7 +180,7 @@ for (let s = periodStart(commits[0].t); s.getTime() <= last.getTime(); s = nextS
     st.commits++; st.last = p.index; authorStats.set(c.a, st);
     let cc = 0;
     for (const f of c.files) {
-      const sec = p.sectors[sectorOf(f.p)];
+      const sec = p.sectors[sectorLabels.get(sectorOf(f.p))!];
       sec.add += f.add; sec.del += f.del;
       p.added += f.add; p.deleted += f.del; cc += f.add + f.del;
     }
@@ -184,14 +201,14 @@ const result: Rings = {
   repo: {
     name: (remote ?? repo!).split("/").filter(Boolean).pop() ?? repo!,
     remote,
-    head: git(["rev-parse", "--short", "HEAD"]).trim(),
+    head: git(["rev-parse", "--short", "HEAD"]).toString().trim(),
     firstCommit: new Date(commits[0].t).toISOString().slice(0, 10),
     lastCommit: last.toISOString().slice(0, 10),
   },
   unit,
   excludedGenerated: !keepGenerated,
   excludedPaths: exclude,
-  sectors: sectorKeys.map((k) => ({ key: k, churn: k === "(other)" ? ranked.slice(keep.length).reduce((a, [, v]) => a + v, 0) : churn.get(k)! })),
+  sectors: sectorKeys.map((k) => ({ key: sectorLabels.get(k)!, churn: k === "(other)" ? ranked.slice(keep.length).reduce((a, [, v]) => a + v, 0) : churn.get(k)! })),
   totals: {
     commits: commits.length,
     authors: seenAuthors.size,
